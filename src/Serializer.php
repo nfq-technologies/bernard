@@ -1,21 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard;
 
 use Normalt\Normalizer\AggregateNormalizer;
 
+/**
+ * @package Bernard
+ */
 class Serializer
 {
     protected $aggregate;
 
+    /**
+     * @param AggregateNormalizer|null $aggregate
+     */
     public function __construct(AggregateNormalizer $aggregate = null)
     {
         $this->aggregate = $aggregate ?: $this->createAggregateNormalizer();
     }
 
     /**
+     * @param Envelope $envelope
+     *
      * @return string
      */
     public function serialize(Envelope $envelope)

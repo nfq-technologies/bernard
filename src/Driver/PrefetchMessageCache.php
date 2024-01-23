@@ -1,20 +1,21 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\Driver;
 
 /**
- * @internal
+ * @package Bernard
  */
-final class PrefetchMessageCache
+class PrefetchMessageCache
 {
-    private array $caches = [];
+    protected $caches = [];
 
     /**
-     * Pushes a $message to the bottom of the cache.
+     * Pushes a $message to the end of the cache.
+     *
+     * @param string $queueName
+     * @param array  $message
      */
-    public function push(string $queueName, Message $message): void
+    public function push($queueName, array $message)
     {
         $cache = $this->get($queueName);
         $cache->enqueue($message);
@@ -23,22 +24,28 @@ final class PrefetchMessageCache
     /**
      * Get the next message in line. Or nothing if there is no more
      * in the cache.
+     *
+     * @param string $queueName
+     *
+     * @return array|null
      */
-    public function pop(string $queueName): ?Message
+    public function pop($queueName)
     {
         $cache = $this->get($queueName);
 
         if (!$cache->isEmpty()) {
             return $cache->dequeue();
         }
-
-        return null;
     }
 
     /**
      * Create the queue cache internally if it doesn't yet exists.
+     *
+     * @param string $queueName
+     *
+     * @return \SplQueue
      */
-    private function get(string $queueName): \SplQueue
+    protected function get($queueName)
     {
         if (isset($this->caches[$queueName])) {
             return $this->caches[$queueName];

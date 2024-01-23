@@ -1,14 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Bernard\Event\EnvelopeEvent;
 use Bernard\Event\PingEvent;
 use Bernard\Event\RejectEnvelopeEvent;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @package Consumer
+ */
 class Consumer
 {
     protected $router;
@@ -17,12 +18,16 @@ class Consumer
     protected $pause = false;
     protected $configured = false;
     protected $options = [
-        'max-runtime' => \PHP_INT_MAX,
+        'max-runtime' => PHP_INT_MAX,
         'max-messages' => null,
         'stop-when-empty' => false,
         'stop-on-error' => false,
     ];
 
+    /**
+     * @param Router                   $router
+     * @param EventDispatcherInterface $dispatcher
+     */
     public function __construct(Router $router, EventDispatcherInterface $dispatcher)
     {
         $this->router = $router;
@@ -30,11 +35,14 @@ class Consumer
     }
 
     /**
-     * Starts an infinite loop calling Consumer::tick();.
+     * Starts an infinite loop calling Consumer::tick();
+     *
+     * @param Queue $queue
+     * @param array $options
      */
-    public function consume(Queue $queue, array $options = []): void
+    public function consume(Queue $queue, array $options = [])
     {
-        declare(ticks=1);
+        declare (ticks = 1);
 
         $this->bind();
 
@@ -46,6 +54,9 @@ class Consumer
     /**
      * Returns true do indicate it should be run again or false to indicate
      * it should not be run again.
+     *
+     * @param Queue $queue
+     * @param array $options
      *
      * @return bool
      */
@@ -77,29 +88,29 @@ class Consumer
             return true;
         }
 
-        return (bool) --$this->options['max-messages'];
+        return (boolean) --$this->options['max-messages'];
     }
 
     /**
-     * Mark Consumer as shutdown.
+     * Mark Consumer as shutdown
      */
-    public function shutdown(): void
+    public function shutdown()
     {
         $this->shutdown = true;
     }
 
     /**
-     * Pause consuming.
+     * Pause consuming
      */
-    public function pause(): void
+    public function pause()
     {
         $this->pause = true;
     }
 
     /**
-     * Resume consuming.
+     * Resume consuming
      */
-    public function resume(): void
+    public function resume()
     {
         $this->pause = false;
     }
@@ -108,16 +119,19 @@ class Consumer
      * Until there is a real extension point to doing invoked stuff, this can be used
      * by wrapping the invoke method.
      *
+     * @param Envelope $envelope
+     * @param Queue    $queue
+     *
      * @throws \Exception
      * @throws \Throwable
      */
-    public function invoke(Envelope $envelope, Queue $queue): void
+    public function invoke(Envelope $envelope, Queue $queue)
     {
         try {
             $this->dispatcher->dispatch(BernardEvents::INVOKE, new EnvelopeEvent($envelope, $queue));
 
-            $receiver = $this->router->route($envelope);
-            $receiver->receive($envelope->getMessage());
+            // for 5.3 support where a function name is not a callable
+            call_user_func($this->router->map($envelope), $envelope->getMessage());
 
             // We successfully processed the message.
             $queue->acknowledge($envelope);
@@ -130,6 +144,11 @@ class Consumer
         }
     }
 
+    /**
+     * @param array $options
+     *
+     * @return void
+     */
     protected function configure(array $options)
     {
         if ($this->configured) {
@@ -148,24 +167,27 @@ class Consumer
      * The difference is that when terminating the consumer, running processes will not stop gracefully
      * and will terminate immediately.
      */
-    protected function bind(): void
+    protected function bind()
     {
-        if (\function_exists('pcntl_signal')) {
-            pcntl_signal(\SIGTERM, [$this, 'shutdown']);
-            pcntl_signal(\SIGINT, [$this, 'shutdown']);
-            pcntl_signal(\SIGQUIT, [$this, 'shutdown']);
-            pcntl_signal(\SIGUSR2, [$this, 'pause']);
-            pcntl_signal(\SIGCONT, [$this, 'resume']);
+        if (function_exists('pcntl_signal')) {
+            pcntl_signal(SIGTERM, [$this, 'shutdown']);
+            pcntl_signal(SIGINT,  [$this, 'shutdown']);
+            pcntl_signal(SIGQUIT, [$this, 'shutdown']);
+            pcntl_signal(SIGUSR2, [$this, 'pause']);
+            pcntl_signal(SIGCONT, [$this, 'resume']);
         }
     }
 
     /**
      * @param \Throwable|\Exception $exception note that the type-hint is missing due to PHP 5.x compat
      *
+     * @param Envelope              $envelope
+     * @param Queue                 $queue
+     *
      * @throws \Exception
      * @throws \Throwable
      */
-    private function rejectDispatch($exception, Envelope $envelope, Queue $queue): void
+    private function rejectDispatch($exception, Envelope $envelope, Queue $queue)
     {
         // Make sure the exception is not interfering.
         // Previously failing jobs handling have been moved to a middleware.

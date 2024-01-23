@@ -1,23 +1,26 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard;
 
 /**
  * Wraps a Message with metadata that can be used for automatic retry
  * or inspection.
+ *
+ * @package Bernard
  */
-final class Envelope
+class Envelope
 {
-    private $message;
-    private $class;
-    private $timestamp;
+    protected $message;
+    protected $class;
+    protected $timestamp;
 
+    /**
+     * @param Message $message
+     */
     public function __construct(Message $message)
     {
         $this->message = $message;
-        $this->class = $message::class;
+        $this->class = get_class($message);
         $this->timestamp = time();
     }
 

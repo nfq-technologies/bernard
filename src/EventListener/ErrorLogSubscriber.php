@@ -1,23 +1,28 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\EventListener;
 
-use Bernard\Envelope;
 use Bernard\Event\RejectEnvelopeEvent;
-use Exception;
+use Bernard\Envelope;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Exception;
 use Throwable;
 
+/**
+ * @package Bernard
+ */
 class ErrorLogSubscriber implements EventSubscriberInterface
 {
-    public function onReject(RejectEnvelopeEvent $event): void
+    /**
+     * @param RejectEnvelopeEvent $event
+     */
+    public function onReject(RejectEnvelopeEvent $event)
     {
         error_log($this->format($event->getEnvelope(), $event->getException()));
     }
 
     /**
+     * @param Envelope $envelope
      * @param mixed $exception
      *
      * @return string
@@ -26,7 +31,7 @@ class ErrorLogSubscriber implements EventSubscriberInterface
     {
         if ($exception instanceof Exception || $exception instanceof Throwable) {
             $replacements = [
-                '{class}' => $exception::class,
+                '{class}' => get_class($exception),
                 '{message}' => $exception->getMessage(),
                 '{envelope}' => $envelope->getName(),
             ];
@@ -35,10 +40,9 @@ class ErrorLogSubscriber implements EventSubscriberInterface
         }
 
         $replacements = [
-            '{type}' => \is_object($exception) ? $exception::class : \gettype($exception),
-            '{envelope}' => $envelope->getName(),
+            '{type}' => is_object($exception) ? get_class($exception) : gettype($exception),
+            '{envelope}' => $envelope->getName()
         ];
-
         return strtr('[bernard] caught unknown error type {type} while processing {envelope}.', $replacements);
     }
 
