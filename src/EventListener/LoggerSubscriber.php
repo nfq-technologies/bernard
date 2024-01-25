@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\EventListener;
 
 use Bernard\Event\EnvelopeEvent;
@@ -9,16 +7,25 @@ use Bernard\Event\RejectEnvelopeEvent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * @package Bernard
+ */
 class LoggerSubscriber implements EventSubscriberInterface
 {
     protected $logger;
 
+    /**
+     * @param LoggerInterface $logger
+     */
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    public function onProduce(EnvelopeEvent $event): void
+    /**
+     * @param EnvelopeEvent $event
+     */
+    public function onProduce(EnvelopeEvent $event)
     {
         $this->logger->info('[bernard] produced {envelope} onto {queue}.', [
             'envelope' => $event->getEnvelope(),
@@ -26,14 +33,20 @@ class LoggerSubscriber implements EventSubscriberInterface
         ]);
     }
 
-    public function onInvoke(EnvelopeEvent $event): void
+    /**
+     * @param EnvelopeEvent $event
+     */
+    public function onInvoke(EnvelopeEvent $event)
     {
         $this->logger->info('[bernard] invoking receiver for {envelope}.', [
             'envelope' => $event->getEnvelope(),
         ]);
     }
 
-    public function onReject(RejectEnvelopeEvent $event): void
+    /**
+     * @param RejectEnvelopeEvent $event
+     */
+    public function onReject(RejectEnvelopeEvent $event)
     {
         $this->logger->error('[bernard] caught exception {exception} while processing {envelope}.', [
             'envelope' => $event->getEnvelope(),

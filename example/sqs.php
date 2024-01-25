@@ -1,21 +1,20 @@
 <?php
 
 use Aws\Sqs\SqsClient;
-use Bernard\Driver\Sqs\Driver;
+use Bernard\Driver\SqsDriver;
 
 /**
  * Must be defined before including bootstrap.php
  * as this is the only custom part in the example.
  */
-function get_driver()
-{
-    $sqs = SqsClient::factory([
-        'key' => getenv('ACCESS_KEY'),
+function get_driver() {
+    $sqs = SqsClient::factory(array(
+        'key'    => getenv('ACCESS_KEY'),
         'secret' => getenv('SECRET_KEY'),
-        'region' => getenv('SQS_REGION'),
-    ]);
+        'region' => getenv('SQS_REGION')
+    ));
 
-    return new Driver($sqs);
+    return new SqsDriver($sqs);
 }
 
 if (!getenv('ACCESS_KEY') || !getenv('SECRET_KEY') || !getenv('SQS_REGION')) {

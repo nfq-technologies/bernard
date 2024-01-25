@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\Command;
 
 use Bernard\Consumer;
@@ -9,15 +7,22 @@ use Bernard\Queue;
 use Bernard\Queue\RoundRobinQueue;
 use Bernard\QueueFactory;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @package Bernard
+ */
 class ConsumeCommand extends \Symfony\Component\Console\Command\Command
 {
     protected $consumer;
     protected $queues;
 
+    /**
+     * @param Consumer     $consumer
+     * @param QueueFactory $queues
+     */
     public function __construct(Consumer $consumer, QueueFactory $queues)
     {
         $this->consumer = $consumer;
@@ -29,7 +34,7 @@ class ConsumeCommand extends \Symfony\Component\Console\Command\Command
     /**
      * {@inheritdoc}
      */
-    public function configure(): void
+    public function configure()
     {
         $this
             ->addOption('max-runtime', null, InputOption::VALUE_OPTIONAL, 'Maximum time in seconds the consumer will run.', null)
@@ -43,7 +48,7 @@ class ConsumeCommand extends \Symfony\Component\Console\Command\Command
     /**
      * {@inheritdoc}
      */
-    public function execute(InputInterface $input, OutputInterface $output): void
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $queue = $this->getQueue($input->getArgument('queue'));
 
@@ -57,13 +62,13 @@ class ConsumeCommand extends \Symfony\Component\Console\Command\Command
      */
     protected function getQueue($queue)
     {
-        if (\is_array($queue)) {
-            if (\count($queue) > 1) {
-                $queues = array_map([$this->queues, 'create'], $queue);
+        if (count($queue) > 1) {
+            $queues = array_map([$this->queues, 'create'], $queue);
 
-                return new RoundRobinQueue($queues);
-            }
+            return new RoundRobinQueue($queues);
+        }
 
+        if (is_array($queue)) {
             $queue = $queue[0];
         }
 

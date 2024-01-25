@@ -1,22 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard;
 
-use Bernard\Exception\ReceiverNotFoundException;
-
 /**
- * Router is responsible for routing a message to it's receiver.
+ * @package Bernard
  */
 interface Router
 {
     /**
-     * Returns the right Receiver based on the Envelope.
+     * Returns the right Receiver (callable) based on the Envelope.
      *
-     * @return Receiver
+     * @param Envelope $envelope
+     *
+     * @return callable
      *
      * @throws ReceiverNotFoundException
      */
-    public function route(Envelope $envelope);
+    public function map(Envelope $envelope);
 }

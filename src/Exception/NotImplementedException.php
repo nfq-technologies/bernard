@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\Exception;
 
-use Bernard\Exception;
-
 /**
- * Thrown when driver does not support requested feature.
+ * Thrown when driver does not support requested feature
+ * @package Bernard
  */
-final class NotImplementedException extends \BadMethodCallException implements Exception
+class NotImplementedException extends \BadMethodCallException implements Exception
 {
 }

@@ -1,12 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\Queue;
 
 use Bernard\Envelope;
 use Bernard\Exception\InvalidOperationException;
 
+/**
+ * @package Bernard
+ */
 abstract class AbstractQueue implements \Bernard\Queue
 {
     protected $closed;
@@ -23,7 +24,7 @@ abstract class AbstractQueue implements \Bernard\Queue
     /**
      * {@inheritdoc}
      */
-    public function close(): void
+    public function close()
     {
         $this->closed = true;
     }
@@ -33,7 +34,7 @@ abstract class AbstractQueue implements \Bernard\Queue
      *
      * {@inheritdoc}
      */
-    public function acknowledge(Envelope $envelope): void
+    public function acknowledge(Envelope $envelope)
     {
         $this->errorIfClosed();
     }
@@ -41,7 +42,7 @@ abstract class AbstractQueue implements \Bernard\Queue
     /**
      * @throws InvalidOperationException
      */
-    protected function errorIfClosed(): void
+    protected function errorIfClosed()
     {
         if ($this->closed) {
             throw new InvalidOperationException(sprintf('Queue "%s" is closed.', $this->name));

@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Bernard\Exception;
 
-use Bernard\Exception;
-
 /**
- * Thrown when a service behind the driver implementation is unavailable.
+ * Thrown when driver implementation is unavailable
+ * @package Bernard
  */
-final class ServiceUnavailableException extends \RuntimeException implements Exception
+class ServiceUnavailableException extends \RuntimeException implements Exception
 {
 }
