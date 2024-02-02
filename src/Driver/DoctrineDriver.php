@@ -27,9 +27,9 @@ class DoctrineDriver implements \Bernard\Driver
     public function listQueues()
     {
         $statement = $this->connection->prepare('SELECT name FROM bernard_queues');
-        $statement->execute();
+        $result = $statement->executeQuery();
 
-        return $statement->fetchAll(\PDO::FETCH_COLUMN);
+        return $result->fetchAllAssociative();
     }
 
     /**
@@ -52,7 +52,7 @@ class DoctrineDriver implements \Bernard\Driver
     {
         $query = 'SELECT COUNT(id) FROM bernard_messages WHERE queue = :queue AND visible = :visible';
 
-        return (integer) $this->connection->fetchColumn($query, [
+        return (integer) $this->connection->fetchOne($query, [
             'queue' => $queueName,
             'visible' => true,
         ]);
@@ -122,7 +122,7 @@ class DoctrineDriver implements \Bernard\Driver
         return $this
             ->connection
             ->executeQuery($query, $parameters, $types)
-            ->fetchAll(\PDO::FETCH_COLUMN)
+            ->fetchAllAssociative()
         ;
     }
 
@@ -160,7 +160,7 @@ class DoctrineDriver implements \Bernard\Driver
                   WHERE queue = :queue AND visible = :visible
                   ORDER BY sentAt LIMIT 1 ' . $this->connection->getDatabasePlatform()->getForUpdateSql();
 
-        list($id, $message) = $this->connection->fetchArray($query, [
+        list($id, $message) = $this->connection->fetchNumeric($query, [
             'queue' => $queueName,
             'visible' => true,
         ]);
